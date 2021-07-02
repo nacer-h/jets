@@ -31,13 +31,13 @@ h_pt_glue.Draw("hist same")
 h_pt_quark.Draw("hist same")
 h_pt_quark.Write()
 h_pt_glue.Write()
-l_pt = TLegend(0.2, 0.7, 0.4, 0.88);
-l_pt.SetTextSize(0.05);
-l_pt.SetBorderSize(0);
-l_pt.AddEntry(h_pt_all, "all", "f");
-l_pt.AddEntry(h_pt_quark, "quark", "f");
-l_pt.AddEntry(h_pt_glue, "gluon", "f");
-l_pt.Draw();
+l_pt = TLegend(0.2, 0.7, 0.4, 0.88)
+l_pt.SetTextSize(0.05)
+l_pt.SetBorderSize(0)
+l_pt.AddEntry(h_pt_all, "all", "f")
+l_pt.AddEntry(h_pt_quark, "quark", "f")
+l_pt.AddEntry(h_pt_glue, "gluon", "f")
+l_pt.Draw()
 c_pt_av.Print("~/lbl/hic/output/c_pt_av.root", "root")
 c_pt_av.Print("~/lbl/hic/output/c_pt_av.pdf", "pdf")
 
@@ -52,12 +52,12 @@ h_pt_glue_norm.Draw("hist ")
 h_pt_quark_norm.Draw("hist same")
 h_pt_glue_norm.Write()
 h_pt_quark_norm.Write()
-l_pt_norm = TLegend(0.65, 0.8, 0.75, 0.9);
-l_pt_norm.SetTextSize(0.05);
-l_pt_norm.SetBorderSize(0);
-l_pt_norm.AddEntry(h_pt_quark_norm, "quark", "f");
-l_pt_norm.AddEntry(h_pt_glue_norm, "gluon", "f");
-l_pt_norm.Draw();
+l_pt_norm = TLegend(0.65, 0.8, 0.75, 0.9)
+l_pt_norm.SetTextSize(0.05)
+l_pt_norm.SetBorderSize(0)
+l_pt_norm.AddEntry(h_pt_quark_norm, "quark", "f")
+l_pt_norm.AddEntry(h_pt_glue_norm, "gluon", "f")
+l_pt_norm.Draw()
 h_pt_glue_norm.SetTitle("Normalized z^{i}_{r}/z_{r} with i = q or g")
 c_pt_av_norm.Print("~/lbl/hic/output/c_pt_av_norm.root", "root")
 c_pt_av_norm.Print("~/lbl/hic/output/c_pt_av_norm.pdf", "pdf")
@@ -72,6 +72,7 @@ h2d_sjet01_pt_q.Draw("colz")
 h2d_sjet01_pt_q.Write()
 c_sjet01_pt_q.Print("~/lbl/hic/output/c_sjet01_pt_q.root", "root")
 c_sjet01_pt_q.Print("~/lbl/hic/output/c_sjet01_pt_q.pdf", "pdf")
+
 # gluon
 c_sjet01_pt_g = TCanvas("c_sjet01_pt_g", "c_sjet01_pt_g", 900, 600)
 c_sjet01_pt_g.cd()
