@@ -22,11 +22,12 @@ gStyle.SetOptStat(0)
 gStyle.SetLineWidth(2)
 
 ## open the input TTree
-treeInput = TFile.Open("/Users/nacer/lbl/pyjetty/pyjetty/sandbox/leadsj_vs_x_bias80.root")
+treeInput = TFile.Open("$PYJETTY_DIR/pyjetty/sandbox/leadsj_vs_x_bias80.root")
 t = treeInput.tlsjvsx
 
 ## save plots in ROOT file
-figOutput = TFile("~/lbl/analysis/output/hists.root","UPDATE")
+outputpath = "~/lbl/analysis/output/"
+figOutput = TFile(f'{outputpath}/output.root',"UPDATE")
 
 print("script runing ...")
 
