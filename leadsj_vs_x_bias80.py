@@ -1,9 +1,14 @@
-import os,sys
-from ROOT import TH1F, TH2D, TFile, TCanvas, TFile, gROOT, TLegend, gStyle, TGraphErrors, TMath
+import sys
+# sys.path.append("/home/nacer/root/")
+# sys.path.append("/home/nacer/root/bin/")
+# sys.path.append("/home/nacer/root/include/")
+# sys.path.append("/home/nacer/root/lib/")
+# from os import path
+from ROOT import TH1F, TH2D, TFile, TCanvas, TFile, gROOT, TLegend, gStyle, TGraphErrors, gPad
 from math import sqrt
 import numpy as np
 
-
+# ROOT.gROOT.Macro( os.path.expanduser( '~/.rootlogon.C' )
 # ROOT.gInterpreter.Declare('#include "TH1.h"')
 # Make the header known to the interpreter
 # ROOT.gInterpreter.ProcessLine('#include "my_header.h"')
@@ -20,13 +25,15 @@ gStyle.SetPadRightMargin(0.16) # 2d:0.17 , 1d:0.05
 gStyle.SetPadLeftMargin(0.16)  # 2d:0.16, 1d:0.15
 gStyle.SetOptStat(0)
 gStyle.SetLineWidth(2)
+gStyle.SetPadGridX(True)
+gStyle.SetPadGridY(True)
 
 ## open the input TTree
 treeInput = TFile.Open("$PYJETTY_DIR/pyjetty/sandbox/leadsj_vs_x_bias80.root")
 t = treeInput.tlsjvsx
 
 ## save plots in ROOT file
-outputpath = "~/lbl/analysis/output/"
+outputpath = "~/analysis/output"
 figOutput = TFile(f'{outputpath}/output.root',"UPDATE")
 
 print("script runing ...")
@@ -55,14 +62,20 @@ l_pt.AddEntry(h_pt_all, "all", "f")
 l_pt.AddEntry(h_pt_q, "quark", "f")
 l_pt.AddEntry(h_pt_g, "gluon", "f")
 l_pt.Draw()
-c_pt_av.Print("~/lbl/analysis/output/c_pt_av.root", "root")
-c_pt_av.Print("~/lbl/analysis/output/c_pt_av.pdf", "pdf")
+c_pt_av.Print(f'{outputpath}/c_pt_av.root', "root")
+c_pt_av.Print(f'{outputpath}/c_pt_av.pdf', "pdf")
 
 ## normalized subjet ratios for each jet type to the total subjets
 c_pt_av_norm = TCanvas("c_pt_av_norm", "c_pt_av_norm", 900, 600)
 c_pt_av_norm.cd()
-h_pt_q_norm = h_pt_q / h_pt_all
-h_pt_g_norm = h_pt_g / h_pt_all
+# h_pt_q_norm = h_pt_q / h_pt_all
+h_pt_q_norm = h_pt_q.Clone("h_pt_q_norm")
+h_pt_q_norm.Divide(h_pt_all)
+h_pt_q_norm.Sumw2()
+# h_pt_g_norm = h_pt_g / h_pt_all
+h_pt_g_norm = h_pt_g.Clone("h_pt_g_norm")
+h_pt_g_norm.Divide(h_pt_all)
+h_pt_g_norm.Sumw2()
 h_pt_q_norm.SetFillColorAlpha(4, 0.5)
 h_pt_g_norm.SetFillColorAlpha(2, 0.5)
 h_pt_g_norm.Draw("hist ")
@@ -76,8 +89,8 @@ l_pt_norm.AddEntry(h_pt_q_norm, "quark", "f")
 l_pt_norm.AddEntry(h_pt_g_norm, "gluon", "f")
 l_pt_norm.Draw()
 h_pt_g_norm.SetTitle("Normalized z^{q,g}_{r}/z_{r}")
-c_pt_av_norm.Print("~/lbl/analysis/output/c_pt_av_norm.root", "root")
-c_pt_av_norm.Print("~/lbl/analysis/output/c_pt_av_norm.pdf", "pdf")
+c_pt_av_norm.Print(f'{outputpath}/c_pt_av_norm.root', "root")
+c_pt_av_norm.Print(f'{outputpath}/c_pt_av_norm.pdf', "pdf")
 
 ## cumulative distribution of q & g subjet ratios
 c_pt_av_norm_cum = TCanvas("c_pt_av_norm_cum", "c_pt_av_norm_cum", 900, 600)
@@ -99,29 +112,29 @@ l_pt_norm_cum.AddEntry(h_pt_q_cum, "quark", "f")
 l_pt_norm_cum.AddEntry(h_pt_g_cum, "gluon", "f")
 l_pt_norm_cum.Draw()
 h_pt_g_cum.SetTitle("Normalized CDF of z^{q,g}_{r}")
-c_pt_av_norm_cum.Print("~/lbl/analysis/output/c_pt_av_norm_cum.root", "root")
-c_pt_av_norm_cum.Print("~/lbl/analysis/output/c_pt_av_norm_cum.pdf", "pdf")
+c_pt_av_norm_cum.Print(f'{outputpath}/c_pt_av_norm_cum.root', "root")
+c_pt_av_norm_cum.Print(f'{outputpath}/c_pt_av_norm_cum.pdf', "pdf")
 
 ## scatter plot of subjet ratios vs. total jet_Pt
 # quark
 c_sjet01_pt_q = TCanvas("c_sjet01_pt_q", "c_sjet01_pt_q", 900, 600)
 c_sjet01_pt_q.cd()
-h2d_sjet01_pt_q = TH2D("h2d_sjet01_pt_q",";P_{t} (GeV/c);z^{q}_{r}",10,80,100,10,0,1)
+h2d_sjet01_pt_q = TH2D("h2d_sjet01_pt_q",";P_{t} (GeV/c);z^{q}_{r}",10,80,300,10,0,1)
 t.Project("h2d_sjet01_pt_q","sjet01_pt/j_pt:j_pt","pquark==1")
 h2d_sjet01_pt_q.Draw("colz")
 h2d_sjet01_pt_q.Write()
-c_sjet01_pt_q.Print("~/lbl/analysis/output/c_sjet01_pt_q.root", "root")
-c_sjet01_pt_q.Print("~/lbl/analysis/output/c_sjet01_pt_q.pdf", "pdf")
+c_sjet01_pt_q.Print(f'{outputpath}/c_sjet01_pt_q.root', "root")
+c_sjet01_pt_q.Print(f'{outputpath}/c_sjet01_pt_q.pdf', "pdf")
 
 # gluon
 c_sjet01_pt_g = TCanvas("c_sjet01_pt_g", "c_sjet01_pt_g", 900, 600)
 c_sjet01_pt_g.cd()
-h2d_sjet01_pt_g = TH2D("h2d_sjet01_pt_g",";P_{t} (GeV/c);z^{g}_{r}",10,80,100,10,0,1)
+h2d_sjet01_pt_g = TH2D("h2d_sjet01_pt_g",";P_{t} (GeV/c);z^{g}_{r}",10,80,300,10,0,1)
 t.Project("h2d_sjet01_pt_g","sjet01_pt/j_pt:j_pt","pglue==1")
 h2d_sjet01_pt_g.Draw("colz")
 h2d_sjet01_pt_g.Write()
-c_sjet01_pt_g.Print("~/lbl/analysis/output/c_sjet01_pt_g.root", "root")
-c_sjet01_pt_g.Print("~/lbl/analysis/output/c_sjet01_pt_g.pdf", "pdf")
+c_sjet01_pt_g.Print(f'{outputpath}/c_sjet01_pt_g.root', "root")
+c_sjet01_pt_g.Print(f'{outputpath}/c_sjet01_pt_g.pdf', "pdf")
 
 ## correlation of sof drop (SD) and lund output variables (delta, z) with subjet ratio (zr)
 
@@ -133,8 +146,8 @@ h2d_sd_z_zr_all = TH2D("h2d_sd_z_zr_all",";z_{r};z_{SD}",10,0,1,10,0.2,0.5)
 t.Project("h2d_sd_z_zr_all","sd_z:sjet01_pt/j_pt")
 h2d_sd_z_zr_all.Draw("colz")
 h2d_sd_z_zr_all.Write()
-c_sd_z_zr_all.Print("~/lbl/analysis/output/c_sd_z_zr_all.root", "root")
-c_sd_z_zr_all.Print("~/lbl/analysis/output/c_sd_z_zr_all.pdf", "pdf")
+c_sd_z_zr_all.Print(f'{outputpath}/c_sd_z_zr_all.root', "root")
+c_sd_z_zr_all.Print(f'{outputpath}/c_sd_z_zr_all.pdf', "pdf")
 
 # delta
 c_sd_delta_zr_all = TCanvas("c_sd_delta_zr_all", "c_sd_delta_zr_all", 900, 600)
@@ -143,8 +156,8 @@ h2d_sd_delta_zr_all = TH2D("h2d_sd_delta_zr_all",";z_{r};#Delta_{SD}",10,0,1,10,
 t.Project("h2d_sd_delta_zr_all","sd_Delta:sjet01_pt/j_pt")
 h2d_sd_delta_zr_all.Draw("colz")
 h2d_sd_delta_zr_all.Write()
-c_sd_delta_zr_all.Print("~/lbl/analysis/output/c_sd_delta_zr_all.root", "root")
-c_sd_delta_zr_all.Print("~/lbl/analysis/output/c_sd_delta_zr_all.pdf", "pdf")
+c_sd_delta_zr_all.Print(f'{outputpath}/c_sd_delta_zr_all.root', "root")
+c_sd_delta_zr_all.Print(f'{outputpath}/c_sd_delta_zr_all.pdf', "pdf")
 
 # Lund
 # z
@@ -154,8 +167,8 @@ h2d_lund_z_zr_all = TH2D("h2d_lund_z_zr_all",";z_{r};z_{lund}",10,0,1,10,0,0.5)
 t.Project("h2d_lund_z_zr_all","lund_z:sjet01_pt/j_pt")
 h2d_lund_z_zr_all.Draw("colz")
 h2d_lund_z_zr_all.Write()
-c_lund_z_zr_all.Print("~/lbl/analysis/output/c_lund_z_zr_all.root", "root")
-c_lund_z_zr_all.Print("~/lbl/analysis/output/c_lund_z_zr_all.pdf", "pdf")
+c_lund_z_zr_all.Print(f'{outputpath}/c_lund_z_zr_all.root', "root")
+c_lund_z_zr_all.Print(f'{outputpath}/c_lund_z_zr_all.pdf', "pdf")
 
 # delta
 c_lund_delta_zr_all = TCanvas("c_lund_delta_zr_all", "c_lund_delta_zr_all", 900, 600)
@@ -164,8 +177,8 @@ h2d_lund_delta_zr_all = TH2D("h2d_lund_delta_zr_all",";z_{r};#Delta_{lund}",10,0
 t.Project("h2d_lund_delta_zr_all","lund_Delta:sjet01_pt/j_pt")
 h2d_lund_delta_zr_all.Draw("colz")
 h2d_lund_delta_zr_all.Write()
-c_lund_delta_zr_all.Print("~/lbl/analysis/output/c_lund_delta_zr_all.root", "root")
-c_lund_delta_zr_all.Print("~/lbl/analysis/output/c_lund_delta_zr_all.pdf", "pdf")
+c_lund_delta_zr_all.Print(f'{outputpath}/c_lund_delta_zr_all.root', "root")
+c_lund_delta_zr_all.Print(f'{outputpath}/c_lund_delta_zr_all.pdf', "pdf")
 
 ## correlation of Lund output variables for q & g
 # lund_Delta vs. lund_z
@@ -176,8 +189,8 @@ h2d_lund_delta_lund_z_q = TH2D("h2d_lund_delta_lund_z_q",";z^{q}_{lund};#Delta^{
 t.Project("h2d_lund_delta_lund_z_q","lund_Delta:lund_z","pquark==1")
 h2d_lund_delta_lund_z_q.Draw("colz")
 h2d_lund_delta_lund_z_q.Write()
-c_lund_delta_lund_z_q.Print("~/lbl/analysis/output/c_lund_delta_lund_z_q.root", "root")
-c_lund_delta_lund_z_q.Print("~/lbl/analysis/output/c_lund_delta_lund_z_q.pdf", "pdf")
+c_lund_delta_lund_z_q.Print(f'{outputpath}/c_lund_delta_lund_z_q.root', "root")
+c_lund_delta_lund_z_q.Print(f'{outputpath}/c_lund_delta_lund_z_q.pdf', "pdf")
 
 # gluon
 c_lund_delta_lund_z_g = TCanvas("c_lund_delta_lund_z_g", "c_lund_delta_lund_z_g", 900, 600)
@@ -186,8 +199,8 @@ h2d_lund_delta_lund_z_g = TH2D("h2d_lund_delta_lund_z_g",";z^{g}_{lund};#Delta^{
 t.Project("h2d_lund_delta_lund_z_g","lund_Delta:lund_z","pglue==1")
 h2d_lund_delta_lund_z_g.Draw("colz")
 h2d_lund_delta_lund_z_g.Write()
-c_lund_delta_lund_z_g.Print("~/lbl/analysis/output/c_lund_delta_lund_z_g.root", "root")
-c_lund_delta_lund_z_g.Print("~/lbl/analysis/output/c_lund_delta_lund_z_g.pdf", "pdf")
+c_lund_delta_lund_z_g.Print(f'{outputpath}/c_lund_delta_lund_z_g.root', "root")
+c_lund_delta_lund_z_g.Print(f'{outputpath}/c_lund_delta_lund_z_g.pdf', "pdf")
 
 # find optimal zr cut to select q/g
 
@@ -212,7 +225,9 @@ for i in range(len(zr_cut)):
     t.Project("h_zr_g","sjet01_pt./j_pt.", f'pglue==1 && (sjet01_pt./j_pt.)>{zr_cut[i]}')
 
     yield_q_err = np.double(0.0)
+    # yield_q_err = array('d',[0])
     yield_g_err = np.double(0.0)
+    # yield_g_err = array('d',[0])
     yield_q = h_zr_q.IntegralAndError(0, h_zr_q.GetNbinsX() + 1, yield_q_err)
     yield_g = h_zr_g.IntegralAndError(0, h_zr_g.GetNbinsX() + 1, yield_g_err)
     q_to_g_ratio = yield_q / yield_g
@@ -226,8 +241,8 @@ for i in range(len(zr_cut)):
 gr_zr_cut.SetTitle("; z_{r} cut; z^{q}_{r}/z^{g}_{r}")
 gr_zr_cut.Draw("AP")
 gr_zr_cut.Write()
-c_zr_cut.Print("~/lbl/analysis/output/c_zr_cut.root", "root")
-c_zr_cut.Print("~/lbl/analysis/output/c_zr_cut.pdf", "pdf")
+c_zr_cut.Print(f'{outputpath}/c_zr_cut.root', "root")
+c_zr_cut.Print(f'{outputpath}/c_zr_cut.pdf', "pdf")
 
 # Soft drop and lund variables after zr cut
 # sd_Delta vs. zr
@@ -238,8 +253,8 @@ h2d_sd_delta_zr_q_postcut = TH2D("h2d_sd_delta_zr_q_postcut",";z^{q}_{r};#Delta^
 t.Project("h2d_sd_delta_zr_q_postcut","sd_Delta:sjet01_pt/j_pt","pquark==1 && (sjet01_pt./j_pt.)>0.90")
 h2d_sd_delta_zr_q_postcut.Draw("colz")
 h2d_sd_delta_zr_q_postcut.Write()
-c_sd_delta_zr_q_postcut.Print("~/lbl/analysis/output/c_sd_delta_zr_q_postcut.root", "root")
-c_sd_delta_zr_q_postcut.Print("~/lbl/analysis/output/c_sd_delta_zr_q_postcut.pdf", "pdf")
+c_sd_delta_zr_q_postcut.Print(f'{outputpath}/c_sd_delta_zr_q_postcut.root', "root")
+c_sd_delta_zr_q_postcut.Print(f'{outputpath}/c_sd_delta_zr_q_postcut.pdf', "pdf")
 
 # gluon
 c_sd_delta_zr_g_postcut = TCanvas("c_sd_delta_zr_g_postcut", "c_sd_delta_zr_g_postcut", 900, 600)
@@ -248,8 +263,8 @@ h2d_sd_delta_zr_g_postcut = TH2D("h2d_sd_delta_zr_g_postcut",";z^{g}_{r};#Delta^
 t.Project("h2d_sd_delta_zr_g_postcut","sd_Delta:sjet01_pt/j_pt","pglue==1 && (sjet01_pt./j_pt.)<0.90")
 h2d_sd_delta_zr_g_postcut.Draw("colz")
 h2d_sd_delta_zr_g_postcut.Write()
-c_sd_delta_zr_g_postcut.Print("~/lbl/analysis/output/c_sd_delta_zr_g_postcut.root", "root")
-c_sd_delta_zr_g_postcut.Print("~/lbl/analysis/output/c_sd_delta_zr_g_postcut.pdf", "pdf")
+c_sd_delta_zr_g_postcut.Print(f'{outputpath}/c_sd_delta_zr_g_postcut.root', "root")
+c_sd_delta_zr_g_postcut.Print(f'{outputpath}/c_sd_delta_zr_g_postcut.pdf', "pdf")
 
 # lund_Delta vs. lund_z
 # quark
@@ -259,8 +274,8 @@ h2d_lund_delta_lund_z_q_postcut = TH2D("h2d_lund_delta_lund_z_q_postcut",";z^{q}
 t.Project("h2d_lund_delta_lund_z_q_postcut","lund_Delta:lund_z","pquark==1 && (sjet01_pt./j_pt.)>0.90")
 h2d_lund_delta_lund_z_q_postcut.Draw("colz")
 h2d_lund_delta_lund_z_q_postcut.Write()
-c_lund_delta_lund_z_q_postcut.Print("~/lbl/analysis/output/c_lund_delta_lund_z_q_postcut.root", "root")
-c_lund_delta_lund_z_q_postcut.Print("~/lbl/analysis/output/c_lund_delta_lund_z_q_postcut.pdf", "pdf")
+c_lund_delta_lund_z_q_postcut.Print(f'{outputpath}/c_lund_delta_lund_z_q_postcut.root', "root")
+c_lund_delta_lund_z_q_postcut.Print(f'{outputpath}/c_lund_delta_lund_z_q_postcut.pdf', "pdf")
 
 # gluon
 c_lund_delta_lund_z_g_postcut = TCanvas("c_lund_delta_lund_z_g_postcut", "c_lund_delta_lund_z_g_postcut", 900, 600)
@@ -269,8 +284,8 @@ h2d_lund_delta_lund_z_g_postcut = TH2D("h2d_lund_delta_lund_z_g_postcut",";z^{g}
 t.Project("h2d_lund_delta_lund_z_g_postcut","lund_Delta:lund_z","pglue==1 && (sjet01_pt./j_pt.)<0.90")
 h2d_lund_delta_lund_z_g_postcut.Draw("colz")
 h2d_lund_delta_lund_z_g_postcut.Write()
-c_lund_delta_lund_z_g_postcut.Print("~/lbl/analysis/output/c_lund_delta_lund_z_g_postcut.root", "root")
-c_lund_delta_lund_z_g_postcut.Print("~/lbl/analysis/output/c_lund_delta_lund_z_g_postcut.pdf", "pdf")
+c_lund_delta_lund_z_g_postcut.Print(f'{outputpath}/c_lund_delta_lund_z_g_postcut.root', "root")
+c_lund_delta_lund_z_g_postcut.Print(f'{outputpath}/c_lund_delta_lund_z_g_postcut.pdf', "pdf")
 
 ## check different zr cuts on z_sd, Delta_sd, z_lund and Delta_lund
 ## z_sd
@@ -297,8 +312,8 @@ l_z_sd.AddEntry(h_z_sd_all, "all", "l")
 l_z_sd.AddEntry(h_z_sd_q, "quark", "l")
 l_z_sd.AddEntry(h_z_sd_g, "gluon", "l")
 l_z_sd.Draw()
-c_z_sd.Print("~/lbl/analysis/output/c_z_sd.root", "root")
-c_z_sd.Print("~/lbl/analysis/output/c_z_sd.pdf", "pdf")
+c_z_sd.Print(f'{outputpath}/c_z_sd.root', "root")
+c_z_sd.Print(f'{outputpath}/c_z_sd.pdf', "pdf")
 
 ## z_sd post cuts
 c_z_sd_cuts = TCanvas("c_z_sd_cuts", "c_z_sd_cuts", 900, 600)
@@ -340,8 +355,8 @@ l_z_sd.AddEntry(h_z_sd_09l, "z_{r}<0.90", "l")
 l_z_sd.AddEntry(h_z_sd_0709, "0.7<z_{r}<0.9", "l")
 l_z_sd.AddEntry(h_z_sd_0307, "0.3<z_{r}<0.7", "l")
 l_z_sd.Draw()
-c_z_sd_cuts.Print("~/lbl/analysis/output/c_z_sd_cuts.root", "root")
-c_z_sd_cuts.Print("~/lbl/analysis/output/c_z_sd_cuts.pdf", "pdf")
+c_z_sd_cuts.Print(f'{outputpath}/c_z_sd_cuts.root', "root")
+c_z_sd_cuts.Print(f'{outputpath}/c_z_sd_cuts.pdf', "pdf")
 
 ## z_lund
 c_z_lund = TCanvas("c_z_lund", "c_z_lund", 900, 600)
@@ -369,8 +384,8 @@ l_z_lund.AddEntry(h_z_lund_all, "all", "l")
 l_z_lund.AddEntry(h_z_lund_q, "quark", "l")
 l_z_lund.AddEntry(h_z_lund_g, "gluon", "l")
 l_z_lund.Draw()
-c_z_lund.Print("~/lbl/analysis/output/c_z_lund.root", "root")
-c_z_lund.Print("~/lbl/analysis/output/c_z_lund.pdf", "pdf")
+c_z_lund.Print(f'{outputpath}/c_z_lund.root', "root")
+c_z_lund.Print(f'{outputpath}/c_z_lund.pdf', "pdf")
 
 ## z_lund post cuts
 c_z_lund_cuts = TCanvas("c_z_lund_cuts", "c_z_lund_cuts", 900, 600)
@@ -414,8 +429,8 @@ l_z_lund.AddEntry(h_z_lund_09l, "z_{r}<0.90", "l")
 l_z_lund.AddEntry(h_z_lund_0709, "0.7<z_{r}<0.9", "l")
 l_z_lund.AddEntry(h_z_lund_0307, "0.3<z_{r}<0.7", "l")
 l_z_lund.Draw()
-c_z_lund_cuts.Print("~/lbl/analysis/output/c_z_lund_cuts.root", "root")
-c_z_lund_cuts.Print("~/lbl/analysis/output/c_z_lund_cuts.pdf", "pdf")
+c_z_lund_cuts.Print(f'{outputpath}/c_z_lund_cuts.root', "root")
+c_z_lund_cuts.Print(f'{outputpath}/c_z_lund_cuts.pdf', "pdf")
 
 ## Delta_sd
 c_Delta_sd = TCanvas("c_Delta_sd", "c_Delta_sd", 900, 600)
@@ -443,8 +458,8 @@ l_Delta_sd.AddEntry(h_Delta_sd_all, "all", "l")
 l_Delta_sd.AddEntry(h_Delta_sd_q, "quark", "l")
 l_Delta_sd.AddEntry(h_Delta_sd_g, "gluon", "l")
 l_Delta_sd.Draw()
-c_Delta_sd.Print("~/lbl/analysis/output/c_Delta_sd.root", "root")
-c_Delta_sd.Print("~/lbl/analysis/output/c_Delta_sd.pdf", "pdf")
+c_Delta_sd.Print(f'{outputpath}/c_Delta_sd.root', "root")
+c_Delta_sd.Print(f'{outputpath}/c_Delta_sd.pdf', "pdf")
 
 ## Delta_sd post cuts
 c_Delta_sd_cuts = TCanvas("c_Delta_sd_cuts", "c_Delta_sd_cuts", 900, 600)
@@ -488,8 +503,8 @@ l_Delta_sd.AddEntry(h_Delta_sd_09l, "z_{r}<0.90", "l")
 l_Delta_sd.AddEntry(h_Delta_sd_0709, "0.7<z_{r}<0.9", "l")
 l_Delta_sd.AddEntry(h_Delta_sd_0307, "0.3<z_{r}<0.7", "l")
 l_Delta_sd.Draw()
-c_Delta_sd_cuts.Print("~/lbl/analysis/output/c_Delta_sd_cuts.root", "root")
-c_Delta_sd_cuts.Print("~/lbl/analysis/output/c_Delta_sd_cuts.pdf", "pdf")
+c_Delta_sd_cuts.Print(f'{outputpath}/c_Delta_sd_cuts.root', "root")
+c_Delta_sd_cuts.Print(f'{outputpath}/c_Delta_sd_cuts.pdf', "pdf")
 
 ## Delta_lund
 c_Delta_lund = TCanvas("c_Delta_lund", "c_Delta_lund", 900, 600)
@@ -517,8 +532,8 @@ l_Delta_lund.AddEntry(h_Delta_lund_all, "all", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_q, "quark", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_g, "gluon", "l")
 l_Delta_lund.Draw()
-c_Delta_lund.Print("~/lbl/analysis/output/c_Delta_lund.root", "root")
-c_Delta_lund.Print("~/lbl/analysis/output/c_Delta_lund.pdf", "pdf")
+c_Delta_lund.Print(f'{outputpath}/c_Delta_lund.root', "root")
+c_Delta_lund.Print(f'{outputpath}/c_Delta_lund.pdf', "pdf")
 
 ## Delta_lund post cuts
 c_Delta_lund_cuts = TCanvas("c_Delta_lund_cuts", "c_Delta_lund_cuts", 900, 600)
@@ -562,8 +577,8 @@ l_Delta_lund.AddEntry(h_Delta_lund_09l, "z_{r}<0.90", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_0709, "0.7<z_{r}<0.9", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_0307, "0.3<z_{r}<0.7", "l")
 l_Delta_lund.Draw()
-c_Delta_lund_cuts.Print("~/lbl/analysis/output/c_Delta_lund_cuts.root", "root")
-c_Delta_lund_cuts.Print("~/lbl/analysis/output/c_Delta_lund_cuts.pdf", "pdf")
+c_Delta_lund_cuts.Print(f'{outputpath}/c_Delta_lund_cuts.root', "root")
+c_Delta_lund_cuts.Print(f'{outputpath}/c_Delta_lund_cuts.pdf', "pdf")
 
 ## selected region/ (all, q, g)
 ## all
@@ -600,8 +615,8 @@ l_Delta_lund.AddEntry(h_Delta_lund_ratio_all_09l, "z_{r}<0.90", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ratio_all_0709, "0.7<z_{r}<0.9", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ratio_all_0307, "0.3<z_{r}<0.7", "l")
 l_Delta_lund.Draw()
-c_Delta_lund_ratio_all_cuts.Print("~/lbl/analysis/output/c_Delta_lund_ratio_all_cuts.root", "root")
-c_Delta_lund_ratio_all_cuts.Print("~/lbl/analysis/output/c_Delta_lund_ratio_all_cuts.pdf", "pdf")
+c_Delta_lund_ratio_all_cuts.Print(f'{outputpath}/c_Delta_lund_ratio_all_cuts.root', "root")
+c_Delta_lund_ratio_all_cuts.Print(f'{outputpath}/c_Delta_lund_ratio_all_cuts.pdf', "pdf")
 
 ## quarks
 c_Delta_lund_ratio_q_cuts = TCanvas("c_Delta_lund_ratio_q_cuts", "c_Delta_lund_ratio_q_cuts", 900, 600)
@@ -637,8 +652,8 @@ l_Delta_lund.AddEntry(h_Delta_lund_ratio_q_09l, "z_{r}<0.90", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ratio_q_0709, "0.7<z_{r}<0.9", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ratio_q_0307, "0.3<z_{r}<0.7", "l")
 l_Delta_lund.Draw()
-c_Delta_lund_ratio_q_cuts.Print("~/lbl/analysis/output/c_Delta_lund_ratio_q_cuts.root", "root")
-c_Delta_lund_ratio_q_cuts.Print("~/lbl/analysis/output/c_Delta_lund_ratio_q_cuts.pdf", "pdf")
+c_Delta_lund_ratio_q_cuts.Print(f'{outputpath}/c_Delta_lund_ratio_q_cuts.root', "root")
+c_Delta_lund_ratio_q_cuts.Print(f'{outputpath}/c_Delta_lund_ratio_q_cuts.pdf', "pdf")
 
 ## gluons
 c_Delta_lund_ratio_g_cuts = TCanvas("c_Delta_lund_ratio_g_cuts", "c_Delta_lund_ratio_g_cuts", 900, 600)
@@ -674,18 +689,18 @@ l_Delta_lund.AddEntry(h_Delta_lund_ratio_g_09l, "z_{r}<0.90", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ratio_g_0709, "0.7<z_{r}<0.9", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ratio_g_0307, "0.3<z_{r}<0.7", "l")
 l_Delta_lund.Draw()
-c_Delta_lund_ratio_g_cuts.Print("~/lbl/analysis/output/c_Delta_lund_ratio_g_cuts.root", "root")
-c_Delta_lund_ratio_g_cuts.Print("~/lbl/analysis/output/c_Delta_lund_ratio_g_cuts.pdf", "pdf")
+c_Delta_lund_ratio_g_cuts.Print(f'{outputpath}/c_Delta_lund_ratio_g_cuts.root', "root")
+c_Delta_lund_ratio_g_cuts.Print(f'{outputpath}/c_Delta_lund_ratio_g_cuts.pdf', "pdf")
 
 ## subjet selection with kt_lund and zr
 c_kt = TCanvas("c_kt","c_kt",900,600)
 c_kt.cd()
-h_kt = TH1F("h_kt",";k_{T};Counts",100, -6, 6)
-t.Project("h_kt","lund_kt")
+h_kt = TH1F("h_kt",";ln(k_{T});Counts",100, -6, 6)
+t.Project("h_kt","log(lund_kt)")
 h_kt.Draw()
 h_kt.Write()
-c_kt.Print("~/lbl/analysis/output/c_kt.root", "root")
-c_kt.Print("~/lbl/analysis/output/c_kt.pdf", "pdf")
+c_kt.Print(f'{outputpath}/c_kt.root', "root")
+c_kt.Print(f'{outputpath}/c_kt.pdf', "pdf")
 
 ## z_lund post kt and zr cuts
 c_z_lund_cuts_2= TCanvas("c_z_lund_cuts_2", "c_z_lund_cuts_2", 900, 600)
@@ -712,8 +727,8 @@ l_z_lund.AddEntry(h_z_lund_09g, "z_{r}>0.90", "l")
 l_z_lund.AddEntry(h_z_lund_ktcut, "ln(k_{T})>0", "l")
 l_z_lund.AddEntry(h_z_lund_zrktcut, "z_{r}>0.90 and ln(k_{T})>0", "l")
 l_z_lund.Draw()
-c_z_lund_cuts_2.Print("~/lbl/analysis/output/c_z_lund_cuts_2.root", "root")
-c_z_lund_cuts_2.Print("~/lbl/analysis/output/c_z_lund_cuts_2.pdf", "pdf")
+c_z_lund_cuts_2.Print(f'{outputpath}/c_z_lund_cuts_2.root', "root")
+c_z_lund_cuts_2.Print(f'{outputpath}/c_z_lund_cuts_2.pdf', "pdf")
 
 ## Delta_lund post kt and zr cuts
 c_Delta_lund_cuts_2= TCanvas("c_Delta_lund_cuts_2", "c_Delta_lund_cuts_2", 900, 600)
@@ -740,7 +755,7 @@ l_Delta_lund.AddEntry(h_Delta_lund_09g, "z_{r}>0.90", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_ktcut, "ln(k_{T})>0", "l")
 l_Delta_lund.AddEntry(h_Delta_lund_zrktcut, "z_{r}>0.90 and ln(k_{T})>0", "l")
 l_Delta_lund.Draw()
-c_Delta_lund_cuts_2.Print("~/lbl/analysis/output/c_Delta_lund_cuts_2.root", "root")
-c_Delta_lund_cuts_2.Print("~/lbl/analysis/output/c_Delta_lund_cuts_2.pdf", "pdf")
+c_Delta_lund_cuts_2.Print(f'{outputpath}/c_Delta_lund_cuts_2.root', "root")
+c_Delta_lund_cuts_2.Print(f'{outputpath}/c_Delta_lund_cuts_2.pdf', "pdf")
 
 
