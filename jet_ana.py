@@ -22,9 +22,9 @@ gStyle.SetPadGridY(True)
 # Open the inpput tree
 try:
     fin = TFile.Open('/home/nacer/analysis/alice_data_analysis_output.root')
+    t = fin.tjets
 except FileNotFoundError:
-    print(f'file {fin} does not exist')
-t = fin.tjets
+    print('file does not exist')
 
 ## save plots in ROOT file
 fout = '~/analysis/output'
